@@ -19,8 +19,8 @@ frontend:
             aws_user_pools_web_client_id: '`jq -r '.[] | select(.OutputKey == "USERPOOLSWEBCLIENTID") | .OutputValue' output.json`',
           }
 
-        export default awsmobile
-        EOF
+          export default awsmobile
+          EOF
     build:
       commands:
         
