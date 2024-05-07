@@ -45,8 +45,27 @@ function Books(props) {
     );
 
     // List books
+    // List books
     useEffect(() => {
-        setLoading(false);
+        async function getAllBooks() {
+            const response = await API.graphql({
+                query: listBooks,
+                variables: {
+                    limit: 1500,
+                    nextToken: nextToken
+                }
+            });
+
+            if (response.hasOwnProperty("errors")) {
+                setBooks([]);
+            } else {
+                setBooks(response.data.listBooks.items);
+                setNextToken(response.data.listBooks.nextToken);
+            }
+            setLoading(false);
+        }
+
+        getAllBooks();
     }, []);
 
     const bookChangeReducer = (_, action) => {
@@ -67,7 +86,11 @@ function Books(props) {
 
     // Subscribe to changes
     useEffect(() => {
-        
+        const newBookSub = onCreateBookSub();
+
+        return () => {
+            newBookSub.unsubscribe();
+        };
     }, []);
 
     function generateFilterOptions() {
