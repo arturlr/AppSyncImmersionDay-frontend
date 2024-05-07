@@ -4,7 +4,7 @@ frontend:
     preBuild:
       commands:
         - npm install
-        - yum install -y jq
+        - sudo yum install -y jq
         - export AWS_REGION=$(aws configure get region)
         - aws cloudformation describe-stacks --stack-name AnyCompanyReadsBackendStack --query 'Stacks[0].Outputs[*]' > output.json
         - |
