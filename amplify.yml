@@ -4,8 +4,26 @@ frontend:
     preBuild:
       commands:
         - npm install
+        - yum install -y jq
+        - export AWS_REGION=$(aws configure get region)
+        - aws cloudformation describe-stacks --stack-name AnyCompanyReadsBackendStack --query 'Stacks[0].Outputs[*]' > output.json
+        - |
+          cat << EOF > src/aws-exports.js
+          const awsmobile = {
+            aws_appsync_graphqlEndpoint: '`jq -r '.[] | select(.OutputKey == "GraphQLAPIURL") | .OutputValue' output.json`',
+            aws_appsync_apiKey: '`jq -r '.[] | select(.OutputKey == "GraphQLAPIKEY") | .OutputValue' output.json`',
+            aws_appsync_authenticationType: 'API_KEY',
+            aws_appsync_region: '`echo ${AWS_REGION}`',
+            aws_cognito_region: '`echo ${AWS_REGION}`',
+            aws_user_pools_id: '`jq -r '.[] | select(.OutputKey == "USERPOOLSID") | .OutputValue' output.json`',
+            aws_user_pools_web_client_id: '`jq -r '.[] | select(.OutputKey == "USERPOOLSWEBCLIENTID") | .OutputValue' output.json`',
+          }
+
+        export default awsmobile
+        EOF
     build:
       commands:
+        
         - npm run build
   artifacts:
     # IMPORTANT - Please verify your build output directory
